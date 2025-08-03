@@ -1,6 +1,4 @@
-import { Clock, Activity, Database, CheckCircle, FileText } from "lucide-react";
-// @ts-expect-error: ECGAnimation module is missing or not yet implemented
-import { ECGAnimation } from "./ECGAnimation";
+import { Clock, Activity, Database, CheckCircle, FileText, Heart } from "lucide-react";
 
 interface ConnectionStatusProps {
   lastUpdated: Date;
@@ -12,6 +10,19 @@ interface ConnectionStatusProps {
   businessHealth?: number;
 }
 
+// Heart Animation Component
+const HeartAnimation = ({ isHealthy, size = 40 }: { isHealthy: boolean; size?: number }) => {
+  return (
+    <div className="relative">
+      <Heart 
+        className={`w-${size/10} h-${size/10} ${isHealthy ? 'text-green-500' : 'text-red-500'} animate-pulse`}
+        style={{ animationDuration: '1.5s' }}
+        fill={isHealthy ? '#10b981' : '#ef4444'}
+      />
+    </div>
+  );
+};
+
 export function ConnectionStatus({ 
   lastUpdated, 
   recordCount, 
@@ -21,19 +32,26 @@ export function ConnectionStatus({
   loading = false,
   businessHealth = 58
 }: ConnectionStatusProps) {
+  const isHealthy = businessHealth >= 80;
+  
   return (
     <div className="glass rounded-xl p-2 border border-glass-border">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <ECGAnimation 
+              <HeartAnimation 
                 size={40} 
-                isHealthy={businessHealth >= 80}
+                isHealthy={isHealthy}
               />
-              <span className={`text-sm font-bold ${businessHealth >= 80 ? 'text-green-500' : 'text-red-500'}`}>
-                {businessHealth}%
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-white">
+                  Business Health
+                </span>
+                <span className={`text-sm font-bold ${isHealthy ? 'text-green-500' : 'text-red-500'}`}>
+                  {businessHealth}%
+                </span>
+              </div>
             </div>
           </div>
         </div>
