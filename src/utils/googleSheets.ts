@@ -1,7 +1,15 @@
 // Google Sheets integration utility
+import { getCountryApiConfig, getSheetConnection, createDynamicAPI } from './dynamicGoogleSheets';
+
 export interface GoogleSheetsConfig {
   spreadsheetId: string;
   sheetId?: string;
+}
+
+// Enhanced config with country support
+export interface DynamicGoogleSheetsConfig {
+  country: 'saudi' | 'egypt';
+  apiName: string;
 }
 
 export class GoogleSheetsAPI {
@@ -92,12 +100,23 @@ export class GoogleSheetsAPI {
   }
 }
 
-// Example usage for your specific Google Sheets
+// Example usage for your specific Google Sheets (legacy)
 export const createDashboardAPI = () => {
   return new GoogleSheetsAPI({
     spreadsheetId: '1O5UEZNHxVgJSJQ49qWvos0AYXqzh8EzFTxzkhY7tprM',
     sheetId: '1794173347'
   });
+};
+
+// Create dynamic dashboard API instance with country-specific configuration
+export const createDynamicDashboardAPI = (country: 'saudi' | 'egypt' = 'saudi') => {
+  try {
+    return createDynamicAPI(country);
+  } catch (error) {
+    console.warn(`Failed to create dynamic API for ${country}, falling back to default:`, error);
+    // Fallback to original API
+    return createDashboardAPI();
+  }
 };
 
 // Transform raw Google Sheets data to dashboard format

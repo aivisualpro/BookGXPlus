@@ -3,6 +3,9 @@ import { StatsOverview } from "./StatsOverview";
 import { RevenueChart } from "./RevenueChart";
 import { PerformanceIndicators } from "./PerformanceIndicators";
 import { ParticleBackground } from "./ParticleBackground";
+import { TurnoverActivityCard } from "./TurnoverActivityCard";
+import { BookingStatusActivityCard } from "./BookingStatusActivityCard";
+import { BookingTypesActivityCard } from "./BookingTypesActivityCard";
 
 import { DateRangeFilter } from "./DateRangeFilter";
 import { createDashboardAPI, transformToDashboardData } from "@/utils/googleSheets";
@@ -54,6 +57,20 @@ export function DashboardLayout({ user, onNavigateHome, onNavigateUsers, onLogou
 
   // Get user's allowed cards
   const getUserCards = () => {
+    // Admin users can see all cards
+    if (user?.Role === 'Admin') {
+      console.log('Admin user detected, showing all cards for:', user.Name);
+      return [
+        'ConnectionStatus', 
+        'StatsOverview', 
+        'RevenueChart', 
+        'PerformanceIndicators',
+        'TurnoverActivityCard',
+        'BookingStatusActivityCard',
+        'BookingTypesActivityCard'
+      ];
+    }
+    
     if (!user?.Cards) {
       console.log('No cards found for user:', user);
       return ['ConnectionStatus', 'StatsOverview'];
@@ -271,6 +288,51 @@ export function DashboardLayout({ user, onNavigateHome, onNavigateUsers, onLogou
             })()}
             
             <div className="space-y-6">
+              {/* Activity Cards Row - 3 cards inline */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* TurnoverActivityCard - Show if user has permission */}
+                {(() => {
+                  const hasPermission = allowedCards.includes('TurnoverActivityCard');
+                  console.log('TurnoverActivityCard permission check:', hasPermission, 'for user:', user?.Name);
+                  return hasPermission ? (
+                    <TurnoverActivityCard 
+                      data={{
+                        locationData: data.stats.locationData,
+                        totalTurnover: data.stats.locationData.reduce((sum, loc) => sum + loc.value, 0)
+                      }}
+                    />
+                  ) : null;
+                })()}
+                
+                {/* BookingStatusActivityCard - Show if user has permission */}
+                {(() => {
+                  const hasPermission = allowedCards.includes('BookingStatusActivityCard');
+                  console.log('BookingStatusActivityCard permission check:', hasPermission, 'for user:', user?.Name);
+                  return hasPermission ? (
+                    <BookingStatusActivityCard 
+                      data={{
+                        revenueByStatus: data.stats.revenueByStatus,
+                        totalRevenue: data.stats.totalRevenue
+                      }}
+                    />
+                  ) : null;
+                })()}
+                
+                {/* BookingTypesActivityCard - Show if user has permission */}
+                {(() => {
+                  const hasPermission = allowedCards.includes('BookingTypesActivityCard');
+                  console.log('BookingTypesActivityCard permission check:', hasPermission, 'for user:', user?.Name);
+                  return hasPermission ? (
+                    <BookingTypesActivityCard 
+                      data={{
+                        naturePieData: data.stats.naturePieData,
+                        totalBookings: data.stats.naturePieData.reduce((sum, type) => sum + type.value, 0)
+                      }}
+                    />
+                  ) : null;
+                })()}
+              </div>
+              
               {/* RevenueChart - Show if user has permission */}
               {(() => {
                 const hasPermission = allowedCards.includes('RevenueChart');

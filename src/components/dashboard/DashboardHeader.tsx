@@ -1,4 +1,4 @@
-import { Clock, Activity, Database, CheckCircle, FileText, Heart, User, Menu, X, LogOut } from "lucide-react";
+import { Clock, Activity, Database, CheckCircle, FileText, Heart, User, Menu, X, LogOut, Settings } from "lucide-react";
 import { useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -16,6 +16,7 @@ interface DashboardHeaderProps {
     Role: string;
   };
   onNavigateUsers?: () => void;
+  onNavigateConnection?: () => void;
   onLogout?: () => void;
 }
 
@@ -110,6 +111,7 @@ export function DashboardHeader({
   onNavigateHome,
   user,
   onNavigateUsers,
+  onNavigateConnection,
   onLogout
 }: DashboardHeaderProps) {
   const isHealthy = businessHealth >= 80;
@@ -155,6 +157,16 @@ export function DashboardHeader({
             >
               <User className="w-4 h-4" />
               <span>Users</span>
+            </button>
+            <button
+              onClick={() => {
+                onNavigateConnection?.();
+                setIsMenuOpen(false);
+              }}
+              className="w-full px-4 py-2 text-left text-sm text-white hover:bg-primary/20 transition-all duration-200 flex items-center space-x-2"
+            >
+              <Settings className="w-4 h-4" />
+              <span>Connection</span>
             </button>
             <div className="border-t border-border/20 my-1"></div>
             <button

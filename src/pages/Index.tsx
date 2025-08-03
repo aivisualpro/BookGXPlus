@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { UsersPage } from "@/components/dashboard/UsersPage";
+import { ConnectionPage } from "@/components/dashboard/ConnectionPage";
 import { LoginModal } from "@/components/dashboard/LoginModal";
 import { fetchUsersData, User } from "@/utils/usersData";
 
 const Index = () => {
-  const [currentPage, setCurrentPage] = useState<'home' | 'users'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'users' | 'connection'>('home');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -58,7 +59,7 @@ const Index = () => {
     initializeApp();
   }, []);
 
-  const handleNavigate = (page: 'home' | 'users') => {
+  const handleNavigate = (page: 'home' | 'users' | 'connection') => {
     if (!isAuthenticated && page === 'home') {
       setShowLoginModal(true);
       return;
@@ -272,6 +273,7 @@ const Index = () => {
         businessHealth={dashboardData?.businessHealth}
         onNavigateHome={() => handleNavigate('home')} 
         onNavigateUsers={() => handleNavigate('users')} 
+        onNavigateConnection={() => handleNavigate('connection')}
         onLogout={handleLogout}
       />
       
@@ -285,9 +287,11 @@ const Index = () => {
             onLogout={handleLogout}
             onDataUpdate={handleDashboardDataUpdate}
           />
-        ) : (
+        ) : currentPage === 'users' ? (
           <UsersPage />
-        )}
+        ) : currentPage === 'connection' ? (
+          <ConnectionPage onBack={() => handleNavigate('home')} />
+        ) : null}
       </div>
 
       <LoginModal
