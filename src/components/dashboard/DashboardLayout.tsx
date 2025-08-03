@@ -3,9 +3,10 @@ import { StatsOverview } from "./StatsOverview";
 import { RevenueChart } from "./RevenueChart";
 import { PerformanceIndicators } from "./PerformanceIndicators";
 import { ParticleBackground } from "./ParticleBackground";
-import { DashboardHeader } from "./DashboardHeader";
+import { ConnectionStatus } from "./DashboardHeader";
 import { DateRangeFilter } from "./DateRangeFilter";
 import { createDashboardAPI, transformToDashboardData } from "@/utils/googleSheets";
+import { User } from "@/utils/usersData";
 
 interface DashboardData {
   revenue: { month: string; value: number; growth: number }[];
@@ -35,13 +36,42 @@ interface DashboardData {
   dataSource: 'google_sheets' | 'mock_data';
 }
 
-export function DashboardLayout() {
+interface DashboardLayoutProps {
+  user?: User;
+}
+
+export function DashboardLayout({ user }: DashboardLayoutProps) {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [dateRange, setDateRange] = useState<{ start: string; end: string }>({ start: '', end: '' });
   const [showFilters, setShowFilters] = useState(false);
   const [currentPeriod, setCurrentPeriod] = useState<string>('default');
+
+  // Get user's allowed cards
+  const getUserCards = () => {
+    if (!user?.Cards) {
+      console.log('No cards found for user:', user);
+      return ['ConnectionStatus', 'StatsOverview'];
+    }
+    
+    const cards = user.Cards.split(',').map(card => card.trim());
+    console.log('User cards:', user.Name, 'Cards:', user.Cards, 'Parsed:', cards);
+    
+    // Special debugging for newrec user
+    if (user.Name.toLowerCase().includes('newrec')) {
+      console.log('🔍 NEWREC USER DEBUG:');
+      console.log('🔍 Original Cards string:', user.Cards);
+      console.log('🔍 Parsed cards array:', cards);
+      console.log('🔍 ConnectionStatus check:', cards.includes('ConnectionStatus'));
+      console.log('🔍 StatsOverview check:', cards.includes('StatsOverview'));
+    }
+    
+    return cards;
+  };
+
+  const allowedCards = getUserCards();
+  console.log('Allowed cards for', user?.Name, ':', allowedCards);
 
   // Function to fetch data from Google Sheets
   const fetchData = async (startDate?: string, endDate?: string): Promise<DashboardData> => {
@@ -98,41 +128,42 @@ export function DashboardLayout() {
             avgOrderValue: 275.50,
             totalReviews: 580,
             reviewsByStatus: { 'Completed': 450, 'Confirmed': 100, 'Canceled': 30 },
-            revenueByStatus: { 'Completed': 650000, 'Confirmed': 150000, 'Canceled': 47000 },
-            acquisitionChannels: { 'Instagram': '45.0', 'Referral': '30.0', 'Unknown': '25.0' },
-            natureBooking: { 'جديد': '70.0', 'رتوش': '30.0' },
+            revenueByStatus: { 'Completed': 720000, 'Confirmed': 80000, 'Canceled': 47000 },
+            acquisitionChannels: { 'Direct': '45%', 'Social Media': '30%', 'Referral': '15%', 'Other': '10%' },
+            natureBooking: { 'Online': '60%', 'Phone': '25%', 'Walk-in': '15%' },
             locationData: [
-              { name: 'Riyadh', value: 450000, percentage: 53.1, color: '#8b5cf6' },
-              { name: 'Jeddah', value: 250000, percentage: 29.5, color: '#06b6d4' },
-              { name: 'Dammam', value: 147000, percentage: 17.4, color: '#10b981' }
+              { name: 'Location A', value: 250000, percentage: 29.5, color: '#8884d8' },
+              { name: 'Location B', value: 220000, percentage: 26.0, color: '#82ca9d' },
+              { name: 'Location C', value: 180000, percentage: 21.3, color: '#ffc658' },
+              { name: 'Location D', value: 150000, percentage: 17.7, color: '#ff7300' },
+              { name: 'Location E', value: 47000, percentage: 5.5, color: '#ff0000' }
             ],
             acquisitionPieData: [
-              { name: 'Instagram', value: 450, percentage: 45.0, color: '#8b5cf6' },
-              { name: 'Referral', value: 300, percentage: 30.0, color: '#06b6d4' },
-              { name: 'Unknown', value: 250, percentage: 25.0, color: '#10b981' }
+              { name: 'Direct', value: 45, percentage: 45, color: '#8884d8' },
+              { name: 'Social Media', value: 30, percentage: 30, color: '#82ca9d' },
+              { name: 'Referral', value: 15, percentage: 15, color: '#ffc658' },
+              { name: 'Other', value: 10, percentage: 10, color: '#ff7300' }
             ],
             naturePieData: [
-              { name: 'جديد', value: 700, percentage: 70.0, color: '#8b5cf6' },
-              { name: 'رتوش', value: 300, percentage: 30.0, color: '#06b6d4' }
+              { name: 'Online', value: 60, percentage: 60, color: '#8884d8' },
+              { name: 'Phone', value: 25, percentage: 25, color: '#82ca9d' },
+              { name: 'Walk-in', value: 15, percentage: 15, color: '#ffc658' }
             ]
           },
-          recordCount: 250,
-          dataSource: 'mock_data' as const
-        };
+        recordCount: 1250,
+        dataSource: 'mock_data'
+      };
     }
   };
 
   const loadData = async (startDate?: string, endDate?: string) => {
     setLoading(true);
     try {
-      const newData = await fetchData(startDate, endDate);
-      setData(newData);
+      const dashboardData = await fetchData(startDate, endDate);
+      setData(dashboardData);
       setLastUpdated(new Date());
-      if (startDate || endDate) {
-        setDateRange({ start: startDate || '', end: endDate || '' });
-      }
     } catch (error) {
-      console.error("Failed to load dashboard data:", error);
+      console.error('Error loading dashboard data:', error);
     } finally {
       setLoading(false);
     }
@@ -193,21 +224,6 @@ export function DashboardLayout() {
       <ParticleBackground />
       
       <div className="relative z-10 p-6 space-y-6">
-        <DashboardHeader 
-          lastUpdated={lastUpdated} 
-          recordCount={data?.recordCount}
-          dataSource={data?.dataSource}
-          onRefresh={handleRefresh}
-          onFilterClick={handleFilterClick}
-          loading={loading}
-          businessHealth={data ? Math.round(
-            (data.performance.serverUptime + 
-             (data.performance.responseTime / 500 * 100) + 
-             (100 - data.performance.errorRate * 2) + 
-             (data.performance.throughput * 2)) / 4
-          ) : 58}
-        />
-        
         {showFilters && (
           <div className="flex justify-start">
             <DateRangeFilter onDateRangeChange={handleDateRangeChange} loading={loading} />
@@ -222,11 +238,54 @@ export function DashboardLayout() {
           </div>
         ) : data ? (
           <div className="space-y-6 animate-fade-in">
-            <StatsOverview stats={data.stats} dateRange={dateRange} onTimePeriodChange={handleTimePeriodChange} currentPeriod={currentPeriod} />
+            {/* ConnectionStatus - Show if user has permission */}
+            {(() => {
+              const hasPermission = allowedCards.includes('ConnectionStatus');
+              console.log('ConnectionStatus permission check:', hasPermission, 'for user:', user?.Name);
+              return hasPermission ? (
+                <ConnectionStatus 
+                  lastUpdated={lastUpdated} 
+                  recordCount={data?.recordCount}
+                  dataSource={data?.dataSource}
+                  onRefresh={handleRefresh}
+                  loading={loading}
+                  businessHealth={data ? Math.round(
+                    (data.performance.serverUptime + 
+                     (data.performance.responseTime / 500 * 100) + 
+                     (100 - data.performance.errorRate * 2) + 
+                     (data.performance.throughput * 2)) / 4
+                  ) : 58}
+                />
+              ) : null;
+            })()}
+            
+            {/* StatsOverview - Show if user has permission */}
+            {(() => {
+              const hasPermission = allowedCards.includes('StatsOverview');
+              console.log('StatsOverview permission check:', hasPermission, 'for user:', user?.Name);
+              return hasPermission ? (
+                <StatsOverview stats={data.stats} dateRange={dateRange} onTimePeriodChange={handleTimePeriodChange} currentPeriod={currentPeriod} />
+              ) : null;
+            })()}
             
             <div className="space-y-6">
-              <RevenueChart data={data.revenue} />
-              <PerformanceIndicators performance={data.performance} />
+              {/* RevenueChart - Show if user has permission */}
+              {(() => {
+                const hasPermission = allowedCards.includes('RevenueChart');
+                console.log('RevenueChart permission check:', hasPermission, 'for user:', user?.Name);
+                return hasPermission ? (
+                  <RevenueChart data={data.revenue} />
+                ) : null;
+              })()}
+              
+              {/* PerformanceIndicators - Show if user has permission */}
+              {(() => {
+                const hasPermission = allowedCards.includes('PerformanceIndicators');
+                console.log('PerformanceIndicators permission check:', hasPermission, 'for user:', user?.Name);
+                return hasPermission ? (
+                  <PerformanceIndicators performance={data.performance} />
+                ) : null;
+              })()}
             </div>
           </div>
         ) : (
