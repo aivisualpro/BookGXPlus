@@ -3,7 +3,7 @@ import { StatsOverview } from "./StatsOverview";
 import { RevenueChart } from "./RevenueChart";
 import { PerformanceIndicators } from "./PerformanceIndicators";
 import { ParticleBackground } from "./ParticleBackground";
-import { ConnectionStatus } from "./DashboardHeader";
+
 import { DateRangeFilter } from "./DateRangeFilter";
 import { createDashboardAPI, transformToDashboardData } from "@/utils/googleSheets";
 import { User } from "@/utils/usersData";
@@ -38,9 +38,13 @@ interface DashboardData {
 
 interface DashboardLayoutProps {
   user?: User;
+  onNavigateHome?: () => void;
+  onNavigateUsers?: () => void;
+  onLogout?: () => void;
+  onDataUpdate?: (data: { dataSource: 'google_sheets' | 'mock_data'; recordCount?: number; lastUpdated: Date; businessHealth?: number }) => void;
 }
 
-export function DashboardLayout({ user }: DashboardLayoutProps) {
+export function DashboardLayout({ user, onNavigateHome, onNavigateUsers, onLogout, onDataUpdate }: DashboardLayoutProps) {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
@@ -212,12 +216,29 @@ export function DashboardLayout({ user }: DashboardLayoutProps) {
   };
 
   useEffect(() => {
-    // Load data with this month by default
-    const endDate = new Date();
-    const startDate = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
-    setCurrentPeriod('this-month');
-    loadData(startDate.toISOString().split('T')[0], endDate.toISOString().split('T')[0]);
+    // Load all data by default (no date filtering)
+    setCurrentPeriod('all');
+    loadData('', ''); // Empty strings mean no date filtering - load all data
   }, []);
+
+  // Notify parent component when data changes
+  useEffect(() => {
+    if (data && onDataUpdate) {
+      const businessHealth = Math.round(
+        (data.performance.serverUptime + 
+         (data.performance.responseTime / 500 * 100) + 
+         (100 - data.performance.errorRate * 2) + 
+         (data.performance.throughput * 2)) / 4
+      );
+      
+      onDataUpdate({
+        dataSource: data.dataSource,
+        recordCount: data.recordCount,
+        lastUpdated: lastUpdated,
+        businessHealth: businessHealth
+      });
+    }
+  }, [data, lastUpdated, onDataUpdate]);
 
   return (
     <div className="min-h-screen bg-gradient-dark relative overflow-hidden">
@@ -238,26 +259,7 @@ export function DashboardLayout({ user }: DashboardLayoutProps) {
           </div>
         ) : data ? (
           <div className="space-y-6 animate-fade-in">
-            {/* ConnectionStatus - Show if user has permission */}
-            {(() => {
-              const hasPermission = allowedCards.includes('ConnectionStatus');
-              console.log('ConnectionStatus permission check:', hasPermission, 'for user:', user?.Name);
-              return hasPermission ? (
-                <ConnectionStatus 
-                  lastUpdated={lastUpdated} 
-                  recordCount={data?.recordCount}
-                  dataSource={data?.dataSource}
-                  onRefresh={handleRefresh}
-                  loading={loading}
-                  businessHealth={data ? Math.round(
-                    (data.performance.serverUptime + 
-                     (data.performance.responseTime / 500 * 100) + 
-                     (100 - data.performance.errorRate * 2) + 
-                     (data.performance.throughput * 2)) / 4
-                  ) : 58}
-                />
-              ) : null;
-            })()}
+
             
             {/* StatsOverview - Show if user has permission */}
             {(() => {

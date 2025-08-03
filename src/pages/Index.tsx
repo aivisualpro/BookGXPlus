@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
-import { StickyHeader } from "@/components/dashboard/StickyHeader";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { UsersPage } from "@/components/dashboard/UsersPage";
 import { LoginModal } from "@/components/dashboard/LoginModal";
 import { fetchUsersData, User } from "@/utils/usersData";
@@ -12,6 +12,12 @@ const Index = () => {
   const [user, setUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState<{
+    dataSource: 'google_sheets' | 'mock_data';
+    recordCount?: number;
+    lastUpdated: Date;
+    businessHealth?: number;
+  } | null>(null);
 
   // Load users data and check authentication on mount
   useEffect(() => {
@@ -86,6 +92,15 @@ const Index = () => {
     setShowLoginModal(false);
   };
 
+  const handleDashboardDataUpdate = (data: {
+    dataSource: 'google_sheets' | 'mock_data';
+    recordCount?: number;
+    lastUpdated: Date;
+    businessHealth?: number;
+  }) => {
+    setDashboardData(data);
+  };
+
   // Show loading state
   if (loading) {
     return (
@@ -136,18 +151,32 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-dark">
-      <StickyHeader 
-        currentPage={currentPage} 
-        onNavigate={handleNavigate} 
-        user={user}
+      {/* Sticky DashboardHeader on all pages */}
+      <DashboardHeader 
+        user={user} 
+        dataSource={dashboardData?.dataSource}
+        recordCount={dashboardData?.recordCount}
+        lastUpdated={dashboardData?.lastUpdated}
+        businessHealth={dashboardData?.businessHealth}
+        onNavigateHome={() => handleNavigate('home')} 
+        onNavigateUsers={() => handleNavigate('users')} 
         onLogout={handleLogout}
       />
       
-      {currentPage === 'home' ? (
-        <DashboardLayout user={user} />
-      ) : (
-        <UsersPage />
-      )}
+      {/* Page Content */}
+      <div className="pt-4">
+        {currentPage === 'home' ? (
+          <DashboardLayout 
+            user={user} 
+            onNavigateHome={() => handleNavigate('home')} 
+            onNavigateUsers={() => handleNavigate('users')} 
+            onLogout={handleLogout}
+            onDataUpdate={handleDashboardDataUpdate}
+          />
+        ) : (
+          <UsersPage />
+        )}
+      </div>
 
       <LoginModal
         isOpen={showLoginModal}
