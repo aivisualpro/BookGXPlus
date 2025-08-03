@@ -279,136 +279,142 @@ export function UsersTable({ onLogout }: UsersTableProps) {
 
   return (
     <div className="space-y-6">
-      {/* Search */}
+      {/* Enhanced Search - Mobile Responsive */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
           type="text"
-          placeholder="Search users by name or role..."
+          placeholder="Search users..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 bg-background/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+          className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-background/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm sm:text-base"
         />
       </div>
 
-      {/* Modern Role Filter Tabs */}
-      <div className="flex w-full flex-col">
-        <div className="relative flex flex-wrap gap-1 bg-muted/50 rounded-lg p-1">
-          {/* Sliding indicator */}
-          <div 
-            className={`absolute top-1 bottom-1 rounded-md transition-all duration-300 ease-in-out ${
-              selectedRole === 'all' ? 'bg-primary' : getRoleTabColor(selectedRole)
-            }`}
-            style={{
-              left: selectedRole === 'all' ? '4px' : 
-                    `${4 + getCumulativePosition(selectedRole)}px`,
-              width: `${getTabWidth(selectedRole)}px`
-            }}
-          />
-          
-          <button
-            onClick={() => setSelectedRole('all')}
-            className={`relative flex items-center space-x-2 px-4 py-2 rounded-md transition-all duration-300 ease-in-out ${
-              selectedRole === 'all'
-                ? 'text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-            style={{ width: `${getTabWidth('All Users')}px` }}
-          >
-            <span className="text-sm font-medium">All Users</span>
-            <span className={`text-xs px-2 py-0.5 rounded-full transition-all duration-300 ${
-              selectedRole === 'all' 
-                ? 'bg-primary-foreground/20 text-primary-foreground' 
-                : 'bg-background/20'
-            }`}>
-              {getRoleCount('all')}
-            </span>
-          </button>
-          
-          {uniqueRoles.map((role, index) => (
-            <button
-              key={role}
-              onClick={() => setSelectedRole(role)}
-              className={`relative flex items-center space-x-2 px-4 py-2 rounded-md transition-all duration-300 ease-in-out ${
-                selectedRole === role
-                  ? 'text-white'
-                  : `${getRoleTabTextColor(role)} hover:text-foreground`
+      {/* Beautiful Mobile-First Filter Tabs - Hidden on Mobile */}
+      <div className="hidden md:flex w-full flex-col">
+        <div className="relative bg-muted/50 rounded-xl p-1">
+          {/* Mobile: Beautiful pill-style tabs */}
+          <div className="flex overflow-x-auto scrollbar-hide gap-1">
+            {/* Animated sliding indicator */}
+            <div 
+              className={`absolute top-1 bottom-1 rounded-lg transition-all duration-500 ease-out shadow-lg ${
+                selectedRole === 'all' ? 'bg-primary' : getRoleTabColor(selectedRole)
               }`}
-              style={{ width: `${getTabWidth(role)}px` }}
+              style={{
+                left: selectedRole === 'all' ? '4px' : 
+                      `${4 + getCumulativePosition(selectedRole)}px`,
+                width: `${getTabWidth(selectedRole)}px`
+              }}
+            />
+            
+            <button
+              onClick={() => setSelectedRole('all')}
+              className={`relative flex items-center justify-center space-x-1 px-3 py-2 rounded-lg transition-all duration-300 ease-out flex-shrink-0 min-w-[60px] ${
+                selectedRole === 'all'
+                  ? 'text-primary-foreground font-medium'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+              style={{ width: `${getTabWidth('All Users')}px` }}
             >
-              <span className="text-sm font-medium">{role}</span>
-              <span className={`text-xs px-2 py-0.5 rounded-full transition-all duration-300 ${
-                selectedRole === role 
-                  ? 'bg-white/20 text-white' 
+              <span className="text-xs font-medium truncate">All</span>
+              <span className={`text-xs px-1.5 py-0.5 rounded-full transition-all duration-300 flex-shrink-0 font-medium ${
+                selectedRole === 'all' 
+                  ? 'bg-primary-foreground/20 text-primary-foreground' 
                   : 'bg-background/20'
               }`}>
-                {getRoleCount(role)}
+                {getRoleCount('all')}
               </span>
             </button>
-          ))}
+            
+            {uniqueRoles.map((role, index) => (
+              <button
+                key={role}
+                onClick={() => setSelectedRole(role)}
+                className={`relative flex items-center justify-center space-x-1 px-3 py-2 rounded-lg transition-all duration-300 ease-out flex-shrink-0 min-w-[60px] ${
+                  selectedRole === role
+                    ? 'text-white font-medium'
+                    : `${getRoleTabTextColor(role)} hover:text-foreground`
+                }`}
+                style={{ width: `${getTabWidth(role)}px` }}
+              >
+                <span className="text-xs font-medium truncate">{role}</span>
+                <span className={`text-xs px-1.5 py-0.5 rounded-full transition-all duration-300 flex-shrink-0 font-medium ${
+                  selectedRole === role 
+                    ? 'bg-white/20 text-white' 
+                    : 'bg-background/20'
+                }`}>
+                  {getRoleCount(role)}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Password Toggle */}
-      <div className="flex items-center justify-between">
+      {/* Enhanced Password Toggle - Mobile Responsive */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-2 sm:space-y-0">
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setShowPasswords(!showPasswords)}
-            className="flex items-center space-x-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center space-x-2 px-3 py-2 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             {showPasswords ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            <span>{showPasswords ? 'Hide' : 'Show'} Passwords</span>
+            <span className="hidden sm:inline">{showPasswords ? 'Hide' : 'Show'} Passwords</span>
+            <span className="sm:hidden">{showPasswords ? 'Hide' : 'Show'}</span>
           </button>
         </div>
-        <div className="text-sm text-muted-foreground">
+        <div className="text-xs sm:text-sm text-muted-foreground">
           {filteredUsers.length} of {users.length} users
         </div>
       </div>
 
       {/* Content */}
       {viewMode === 'cards' ? (
-        /* Card View */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        /* Enhanced Card View - Mobile First */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
           {filteredUsers.map((user, index) => (
-            <div key={index} className="glass rounded-xl p-6 hover:shadow-lg transition-all duration-200 border border-border/50">
-              {/* User Avatar and Name */}
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
-                  <UserIcon className="w-6 h-6 text-primary" />
+            <div key={index} className="glass rounded-xl p-3 sm:p-4 lg:p-6 hover:shadow-lg transition-all duration-200 border border-border/50 group">
+              {/* User Avatar and Name - Mobile Optimized */}
+              <div className="flex items-start space-x-2 sm:space-x-3 mb-3 sm:mb-4">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                  <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-foreground truncate">{user.Name}</h3>
-                  <div className="flex items-center space-x-2 mt-1">
-                    {getRoleIcon(user.Role)}
-                    <span className={`text-xs px-2 py-1 rounded-full border ${getRoleColor(user.Role)}`}>
-                      {user.Role}
-                    </span>
+                  <h3 className="font-semibold text-foreground truncate text-sm sm:text-base">{user.Name}</h3>
+                  <div className="flex items-center space-x-1 sm:space-x-2 mt-1 flex-wrap">
+                    <div className="flex items-center space-x-1">
+                      {getRoleIcon(user.Role)}
+                      <span className={`text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full border ${getRoleColor(user.Role)}`}>
+                        {user.Role}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Password */}
-              <div className="mb-4">
-                <div className="flex items-center space-x-2 mb-2">
-                  <Key className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Password</span>
+              {/* Password - Responsive */}
+              <div className="mb-3 sm:mb-4">
+                <div className="flex items-center space-x-1 sm:space-x-2 mb-1 sm:mb-2">
+                  <Key className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
+                  <span className="text-xs sm:text-sm text-muted-foreground">Password</span>
                 </div>
-                <div className="text-sm font-mono bg-muted/50 rounded px-3 py-2">
+                <div className="text-xs sm:text-sm font-mono bg-muted/50 rounded px-2 sm:px-3 py-1 sm:py-1.5 lg:py-2 break-all">
                   {showPasswords ? user.Password || '—' : '••••••••'}
                 </div>
               </div>
 
-              {/* Access Cards */}
+              {/* Access Cards - Mobile Optimized */}
               <div>
-                <div className="flex items-center space-x-2 mb-2">
-                  <Shield className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Access Cards</span>
+                <div className="flex items-center space-x-1 sm:space-x-2 mb-1 sm:mb-2">
+                  <Shield className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
+                  <span className="text-xs sm:text-sm text-muted-foreground">Access Cards</span>
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {getCardBadges(user.Cards || '').map((card, cardIndex) => (
                     <span
                       key={cardIndex}
-                      className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary border border-primary/20"
+                      className="inline-flex px-1 sm:px-1.5 lg:px-2 py-0.5 sm:py-1 text-xs font-medium rounded-full bg-primary/10 text-primary border border-primary/20"
                     >
                       {card}
                     </span>
@@ -419,9 +425,54 @@ export function UsersTable({ onLogout }: UsersTableProps) {
           ))}
         </div>
       ) : (
-        /* Table View */
+        /* Enhanced Table View - Mobile Responsive */
         <div className="glass rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Mobile Card View for Table Mode */}
+          <div className="block lg:hidden">
+            {filteredUsers.map((user, index) => (
+              <div key={index} className="p-4 border-b border-border/50 last:border-b-0">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
+                      <UserIcon className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground text-sm">{user.Name}</h3>
+                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getRoleColor(user.Role)}`}>
+                        {user.Role}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">Password:</span>
+                    <div className="text-xs font-mono bg-muted/50 rounded px-2 py-1">
+                      {showPasswords ? user.Password || '—' : '••••••••'}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <span className="text-xs text-muted-foreground block mb-1">Access Cards:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {getCardBadges(user.Cards || '').map((card, cardIndex) => (
+                        <span
+                          key={cardIndex}
+                          className="inline-flex px-1.5 py-0.5 text-xs font-medium rounded-full bg-primary/10 text-primary"
+                        >
+                          {card}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Desktop Table View */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full">
               <thead className="bg-muted/50">
                 <tr>
@@ -477,29 +528,29 @@ export function UsersTable({ onLogout }: UsersTableProps) {
         </div>
       )}
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="glass rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-foreground">{users.length}</div>
-          <div className="text-sm text-muted-foreground">Total Users</div>
+      {/* Enhanced Summary Cards - Mobile Responsive */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        <div className="glass rounded-xl p-3 sm:p-4 text-center">
+          <div className="text-lg sm:text-2xl font-bold text-foreground">{users.length}</div>
+          <div className="text-xs sm:text-sm text-muted-foreground">Total Users</div>
         </div>
-        <div className="glass rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-foreground">
+        <div className="glass rounded-xl p-3 sm:p-4 text-center">
+          <div className="text-lg sm:text-2xl font-bold text-foreground">
             {users.filter(u => u.Role.toLowerCase() === 'admin').length}
           </div>
-          <div className="text-sm text-muted-foreground">Admins</div>
+          <div className="text-xs sm:text-sm text-muted-foreground">Admins</div>
         </div>
-        <div className="glass rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-foreground">
+        <div className="glass rounded-xl p-3 sm:p-4 text-center">
+          <div className="text-lg sm:text-2xl font-bold text-foreground">
             {users.filter(u => u.Role.toLowerCase() !== 'admin').length}
           </div>
-          <div className="text-sm text-muted-foreground">Regular Users</div>
+          <div className="text-xs sm:text-sm text-muted-foreground">Regular Users</div>
         </div>
-        <div className="glass rounded-xl p-4 text-center">
-          <div className="text-2xl font-bold text-foreground">
+        <div className="glass rounded-xl p-3 sm:p-4 text-center">
+          <div className="text-lg sm:text-2xl font-bold text-foreground">
             {users.filter(u => u.Cards?.includes('PerformanceIndicators')).length}
           </div>
-          <div className="text-sm text-muted-foreground">Full Access</div>
+          <div className="text-xs sm:text-sm text-muted-foreground">Full Access</div>
         </div>
       </div>
     </div>

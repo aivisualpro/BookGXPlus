@@ -175,28 +175,41 @@ export function DashboardHeader({
   };
   
   return (
-    <div className="sticky top-0 z-50 glass rounded-xl p-2 border border-glass-border">
+    <div className="sticky top-0 z-50 glass p-2">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-6">
-          {/* Animated Logo */}
+        {/* Mobile: Only Logo and Burger Menu */}
+        <div className="flex md:hidden items-center justify-between w-full">
           <div className="flex items-center">
-            <div className="relative w-10 h-10 mr-3">
-              {/* Animated Book Icon */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/60 rounded-lg animate-pulse">
-                <div className="absolute inset-1 bg-background/90 rounded-md flex items-center justify-center">
-                  <svg 
-                    className="w-6 h-6 text-primary animate-bounce" 
-                    fill="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M21,4H3A2,2 0 0,0 1,6V19A2,2 0 0,0 3,21H21A2,2 0 0,0 23,19V6A2,2 0 0,0 21,4M3,19V6H8V19H3M10,19V6H21V19H10Z" />
-                  </svg>
-                </div>
+            {/* BookGX Plus Title */}
+            <button
+              onClick={onNavigateHome}
+              className="text-lg font-bold text-white hover:text-primary/80 transition-colors duration-200 cursor-pointer"
+            >
+              BookGX Plus
+            </button>
+          </div>
+
+          {/* Mobile Burger Menu */}
+          <div className="relative">
+            <button
+              onClick={handleMenuToggle}
+              className="p-2 text-white hover:text-primary/80 transition-all duration-300 transform hover:scale-110"
+            >
+              <div className="relative">
+                <Menu className={`w-5 h-5 transition-all duration-300 ${isMenuOpen ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'}`} />
+                <X className={`w-5 h-5 absolute top-0 left-0 transition-all duration-300 ${isMenuOpen ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}`} />
               </div>
-              {/* Glow effect */}
-              <div className="absolute inset-0 bg-primary/20 rounded-lg blur-sm animate-ping"></div>
-            </div>
-            
+            </button>
+
+            {/* Dropdown Menu */}
+            {isMenuOpen && renderDropdown()}
+          </div>
+        </div>
+
+        {/* Desktop/Tablet: Full Header */}
+        <div className="hidden md:flex items-center space-x-6">
+          {/* BookGX Plus Title - Desktop */}
+          <div className="flex items-center">
             {/* BookGX Plus Title */}
             <button
               onClick={onNavigateHome}
@@ -231,7 +244,7 @@ export function DashboardHeader({
           </div>
         </div>
         
-        <div className="flex items-center space-x-4">
+        <div className="hidden md:flex items-center space-x-4">
           {/* Data Source and Record Count */}
           <div className="hidden lg:flex items-center space-x-3">
             <div className="flex items-center space-x-2 text-xs">
@@ -275,7 +288,7 @@ export function DashboardHeader({
             </div>
           </div>
 
-          {/* Burger Menu */}
+          {/* Desktop Burger Menu */}
           <div className="relative">
             <button
               onClick={handleMenuToggle}
